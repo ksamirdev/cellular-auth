@@ -1,0 +1,4 @@
+/result
+/result-*
+*.test
+*.out
