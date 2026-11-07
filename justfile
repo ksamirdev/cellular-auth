@@ -13,8 +13,9 @@ test-db:
 test: test-db
     TEST_DATABASE_URL='{{ test_db }}' go test -race -count=1 ./...
 
+# Same pinned version CI uses, built with the local Go toolchain.
 lint:
-    golangci-lint run
+    go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.6.2 run
 
 # Start four cells, the router and the replicator.
 up:
