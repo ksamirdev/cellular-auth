@@ -243,11 +243,13 @@ func TestOutboxCursorMissesNothing(t *testing.T) {
 }
 
 // Regression: the outbox was once sorted by txid as text, so a page starting
-// below 10000 jumped straight to "10000" and skipped 9999.
+// below 10000 jumped straight to "10000" and skipped 9999. The ids used here
+// cross a digit boundary too, and are low enough to be visible on a freshly
+// initialized cluster.
 func TestOutboxOrdersTxidsNumerically(t *testing.T) {
 	s := newStore(t, "cell-1", 0)
 	ctx := context.Background()
-	if _, err := s.pool.Exec(ctx, `INSERT INTO outbox (txid, event) VALUES ('10000', '{}'), ('9999', '{}')`); err != nil {
+	if _, err := s.pool.Exec(ctx, `INSERT INTO outbox (txid, event) VALUES ('100', '{}'), ('99', '{}')`); err != nil {
 		t.Fatal(err)
 	}
 	entries, err := s.ReadOutbox(ctx, startPosition, 10)
@@ -258,7 +260,7 @@ func TestOutboxOrdersTxidsNumerically(t *testing.T) {
 	for _, e := range entries {
 		got = append(got, e.TxID)
 	}
-	if fmt.Sprint(got) != "[9999 10000]" {
+	if fmt.Sprint(got) != "[99 100]" {
 		t.Fatalf("outbox order = %v, want numeric", got)
 	}
 }
