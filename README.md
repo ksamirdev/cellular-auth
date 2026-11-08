@@ -5,7 +5,8 @@
 A small card payment system in Go that keeps approving payments even when part of it crashes.
 
 I built it to learn how real payment systems stay up.
-It is based on American Express's blog post on [cell-based architecture](https://americanexpress.io/cell-based-architecture-for-resilient-payment-systems/).
+It applies the cell pattern from American Express's blog post on [cell-based architecture](https://americanexpress.io/cell-based-architecture-for-resilient-payment-systems/) to the card issuer's side.
+Amex's cells forward payments to issuers; this system is the issuer that approves or declines them.
 
 ## The problem, with an example
 
@@ -112,7 +113,7 @@ If the client retries with the same `txn_id`, the cell returns the saved answer 
 The backup's copy can be a fraction of a second out of date.
 So the backup only approves while the account's not-yet-synced stand-in approvals stay under a cap, $500 by default (`STANDIN_CAP_MINOR=50000`).
 This puts a limit on how much an account can overspend while its home cell is down.
-Real card networks do the same thing and call it stand-in processing.
+Some card networks offer a version of this, called stand-in processing, that approves on the issuer's behalf when the issuer is down.
 
 **Replicator - "keep the cells in sync"**
 When a cell changes something, it also writes an event to an **outbox** table in the same transaction.
